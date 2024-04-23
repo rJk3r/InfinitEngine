@@ -1,27 +1,28 @@
 #include "SwapChain.h"
 #include "GraphicEngine.h"
+#include <iostream>
 
-SwapChain::SwapChain() : m_current_back_buffer_index(0) {
+constexpr UINT SwapChainBufferCount = 2;
+
+
+SwapChain::SwapChain() : m_current_back_buffer_index(0), m_rtvDescriptorHeap(nullptr) {
     // Инициализируем переменную m_back_buffers
-    const UINT SwapChainBufferCount = 2;
     m_back_buffers.resize(SwapChainBufferCount); // Здесь SwapChainBufferCount - количество буферов в цепочке SwapChain
 }
 
-SwapChain::~SwapChain()
-{
-    // Деструктор
-}
-
 ID3D12DescriptorHeap* SwapChain::getRTVDescriptorHeap() const {
+    std::cout << "RTVDescriptor: " << m_rtvDescriptorHeap << "\n";
     return m_rtvDescriptorHeap;
 }
 
 UINT SwapChain::getCurrentBackBufferIndex() const {
+    std::cout << "m_currentBackBufferIndex: " << m_currentBackBufferIndex << "\n";
     return m_currentBackBufferIndex;
 }
 
 ID3D12Resource* SwapChain::getCurrentBackBuffer() const {
     if (m_back_buffers.empty() || m_current_back_buffer_index >= m_back_buffers.size()) {
+        std::cout << "m_back_buffers is empty or index is out of bounds\n";
         return nullptr; // Возвращаем nullptr в случае ошибки
     }
     return m_back_buffers[m_current_back_buffer_index]; // Возвращаем указатель на текущий буфер кадра
@@ -50,8 +51,20 @@ bool SwapChain::init(HWND hwnd, UINT width, UINT height)
     m_desc.SampleDesc.Quality = 0;
     m_desc.Windowed = TRUE;
 
-    HRESULT hr = GraphicEngine::get()->m_dxgi_factory->CreateSwapChain(GraphicEngine::get()->m_d3d_device, &m_desc, &m_swap_chain);
+    // Инициализация переменной rtvHeapDesc
+    D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
+    rtvHeapDesc.NumDescriptors = SwapChainBufferCount; // Количество дескрипторов в куче
+    rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // Тип кучи
+    rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // Флаги (в данном случае нет дополнительных флагов)
 
+    HRESULT hr = GraphicEngine::get()->m_d3d_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvDescriptorHeap));
+    if (FAILED(hr))
+    {
+        // Обработка ошибки
+        return false;
+    }
+
+    hr = GraphicEngine::get()->m_dxgi_factory->CreateSwapChain(GraphicEngine::get()->m_d3d_command_queue, &m_desc, &m_swap_chain);
     if (FAILED(hr))
     {
         // Обработка ошибки
@@ -61,6 +74,7 @@ bool SwapChain::init(HWND hwnd, UINT width, UINT height)
     return true;
 }
 
+
 bool SwapChain::present(bool vsync) {
     m_swap_chain->Present(vsync, NULL);
     return true;
@@ -68,12 +82,14 @@ bool SwapChain::present(bool vsync) {
 
 bool SwapChain::release()
 {
-    if (m_swap_chain)
-    {
-        m_swap_chain->Release();
-        m_swap_chain = nullptr; // Обнуляем указатель после освобождения ресурсов
-    }
+    m_swap_chain->Release();
+    delete this;
 
     // Возвращаем true, чтобы показать успешное освобождение
     return true;
+}
+
+SwapChain::~SwapChain()
+{
+    // Деструктор
 }

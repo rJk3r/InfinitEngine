@@ -40,6 +40,8 @@ private:
 	friend class SwapChain;
 private:
 	unsigned int m_rtvDescriptorSize; // Размер дескриптора кучи RTV
+private:
+	SwapChain* m_swap_chain;
 };
 
 

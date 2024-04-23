@@ -74,14 +74,13 @@ bool Window::broadcast()
 {
 	MSG msg;
 
+	this->onUpdate();
 
 	while ((::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))>0)
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-
-	win->onUpdate();
 	Sleep(0);
 
 	return true;
@@ -116,6 +115,14 @@ void Window::onDestroy()
 {
 	// if the window is not initialized
 	m_is_run = false;
+}
+
+void Window::onCreate() {
+	// Реализация метода onUpdate
+}
+
+void Window::onUpdate() {
+	// Реализация метода onUpdate
 }
 
 Window::~Window()

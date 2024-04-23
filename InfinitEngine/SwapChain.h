@@ -4,6 +4,7 @@
 #include <vector>
 #include <d3d12.h>
 #include <dxgi.h>
+
 class SwapChain
 {
 public:
@@ -21,12 +22,9 @@ public:
     bool release();
 
 private:
-    ID3D12DescriptorHeap* m_rtvDescriptorHeap; 
-    UINT m_currentBackBufferIndex; 
-private:
+    ID3D12DescriptorHeap* m_rtvDescriptorHeap;
+    UINT m_currentBackBufferIndex;
     std::vector<ID3D12Resource*> m_back_buffers;
-private:
     IDXGISwapChain* m_swap_chain = nullptr; // Инициализируем указатель m_swap_chain значением nullptr
-private:
-    UINT m_current_back_buffer_index; // Добавляем переменную для отслеживания текущего буфера
+    UINT m_current_back_buffer_index = 0; // Добавляем переменную для отслеживания текущего буфера
 };

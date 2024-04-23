@@ -2,6 +2,8 @@
 #include "SwapChain.h"
 #include "d3dx12.h"
 #include <d3d12.h>
+#include "App.h"
+
 
 GraphicEngine::GraphicEngine()
 {
@@ -81,6 +83,7 @@ bool GraphicEngine::init()
 	// to record right now and the main loop expects it to be closed, we close it.
 	m_command_list->Close();
 
+	
 	hr = m_d3d_device->QueryInterface(__uuidof(IDXGIDevice), reinterpret_cast<void**>(&m_dxgi_device));
 	if (FAILED(hr) || m_dxgi_device == nullptr)
 	{
@@ -129,7 +132,8 @@ GraphicEngine::~GraphicEngine()
 
 SwapChain* GraphicEngine::createSwapChain()
 {
-	return new SwapChain();
+	SwapChain* swapChain = new SwapChain();
+	return swapChain;
 }
 
 GraphicEngine* GraphicEngine::get()
